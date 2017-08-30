@@ -3,6 +3,94 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+### Project rubric
+
+#### The model
+
+* Student describes their model in detail. 
+This includes the state, actuators and update equations.
+
+The approach taken was a [kinematic model](src/main.cpp#L136) provided in the lessons. The decision to take the simplistic
+model instead of a dynamic one was just because we do not have any forces like gravity, air to deal with
+inside the simulator.
+
+The _state_ consists of:
+
+* position  **x,y**
+* heading   **psi**
+* velocity  **v**_
+
+saved in a vector.
+
+_Actuators_ are **steering angle** and **throttle**.
+
+![States and Actuators](images/statevector.PNG?raw=true "States and Actuators")
+
+With that state and actuators it is possible to create a simplistic but good model.
+
+For updating the state the following equations have been used, which again were provided in the lessons:
+
+![Update equations](images/equations.PNG?raw=true "Update equations")
+
+The next step is calculated by combining the previous states and actuations.
+
+For further improvement we are also interested in errors caused by changing the state over time.
+Therefor 2 new parameters are introduced which build our cost function for our MPC:
+
+![Cross Track Error](images/cte.PNG?raw=true "Cross Track Error")
+
+![EPSI](images/epsi.PNG?raw=true "EPSI")
+
+
+#### Timestep Length and Elapsed Duration (N & dt)
+
+* Student discusses the reasoning behind the chosen N (timestep length) and dt (elapsed duration between timesteps) values. 
+* Additionally the student details the previous values tried.
+
+A relatively small number of steps has been chosen because it is not valuable to predict very much into the future.
+With every millisecond the world around changes, so we talk about a small time horizon of 1 second
+into the future. Also it is much faster through less computational cost.
+
+**N**umber of variables to optimize: 10
+**T**imestep **d**uration: 0.1
+
+That calculates to N * dt seconds = 10 * 0.1 = 1s horizon
+
+Larger values of dt lead to less frequent acutations and therefor higher updates which are likely
+to cause trouble on establishing a smooth trajectory.
+
+At first the provided parameters of the quizzes were tried: n=25, dt=0.5 which lead to unstable behaviour on 
+the steering, so i decided to target the 100ms latency used for submitting this project.
+
+#### Polynomial Fitting and MPC Preprocessing
+
+*  A polynomial is fitted to waypoints.
+* If the student preprocesses waypoints, the vehicle state, and/or actuators prior to the MPC procedure it is described.
+
+[Fitting polynomials](src/main.cpp#L115) was essential for solving this project. I tried first from the quizzes the 1st order polynomials which led
+to cutting curves on the track. For a smooth trajectory it is necessary to fitted to 3rd order polynomials.
+
+For easier calculation, prior to fitting, the waypoints have been [transformed into the vehicles coordinate system](src/main.cpp#L102).
+
+#### Model Predictive Control with Latency
+
+* The student implements Model Predictive Control that handles a 100 millisecond latency. 
+* Student provides details on how they deal with latency.
+
+The chosen kinematic model deals with the latency by incorporating the time through the update equations.
+Additonally the [cost parameters](src/MPC.cpp#L63:L71) have been adapted to minimize the value gap between sequential actuations.
+
+#### Video
+
+##### Without latency
+
+[![Without latency](https://img.youtube.com/vi/EhWLhh2iot0/0.jpg)](https://youtu.be/EhWLhh2iot0)
+
+##### With latency 0.1s
+
+[![With latency](https://img.youtube.com/vi/GUFkgN_C3Dc/0.jpg)](https://youtu.be/GUFkgN_C3Dc)
+
+
 ## Dependencies
 
 * cmake >= 3.5

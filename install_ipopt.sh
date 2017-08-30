@@ -1,9 +1,5 @@
-# Pass the Ipopt source directory as the first argument
-if [ -z $1 ]
-then
-    echo "Specifiy the location of the Ipopt source directory in the first argument."
-    exit
-fi
+#!/bin/bash
+
 cd $1
 
 prefix=/usr/local
